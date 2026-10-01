@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Courses · DKU CoursePilot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <style>
+    .search-panel{padding:18px;margin-bottom:16px}.search-main{display:grid;grid-template-columns:190px minmax(240px,1fr) auto auto;gap:9px;align-items:end}.control{display:grid;gap:6px}.control label{color:#475467;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.control input,.control select{width:100%;min-height:41px;padding:9px 11px;font:inherit;font-size:13px}.filter-grid{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.results-meta{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:19px 2px 12px;color:var(--muted);font-size:12px}.course-list{display:grid;gap:8px}.course-row{display:grid;grid-template-columns:minmax(230px,1.25fr) .72fr .9fr .72fr .55fr auto;gap:16px;align-items:center;padding:15px 17px}.course-id{min-width:0}.course-id strong{display:block;font-size:14px}.course-id span{display:block;margin-top:4px;overflow:hidden;color:var(--muted);font-size:12px;text-overflow:ellipsis;white-space:nowrap}.cell strong{display:block;color:#344054;font-size:12px}.cell span{display:block;margin-top:3px;color:var(--muted);font-size:10px}.metric{text-align:center}.metric strong{font-size:15px}.metric.match strong{color:var(--primary)}.actions{display:flex;gap:7px}.status{display:inline-flex!important;width:max-content;padding:4px 7px;border-radius:999px;font-size:9px!important;font-weight:800}.status.open{color:#087a78;background:#e8fbf8}.status.closed{color:#b42318;background:#fff1f0}.empty{padding:60px 20px;text-align:center;color:var(--muted)}@media(max-width:1050px){.course-row{grid-template-columns:minmax(220px,1fr) .8fr .8fr auto}.course-row>.cell:nth-of-type(3),.course-row>.metric:nth-of-type(5){display:none}.filter-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.search-main{grid-template-columns:1fr}.filter-grid{grid-template-columns:1fr 1fr}.course-row{grid-template-columns:1fr auto}.course-row>.cell,.course-row>.metric{display:none}.actions{grid-column:1/-1}.results-meta{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+<main class="container">
+  <header class="app-header"><a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">DKU</span> CoursePilot</a><nav class="app-nav" aria-label="Main navigation"><a href="{{ url_for('index') }}">Home</a><a class="active" href="{{ url_for('courses', db_file=current_db) }}">Courses</a><a href="{{ url_for('profile_page') }}">Profile</a><a href="{{ url_for('reviews_page') }}">Reviews</a><a href="{{ url_for('schedule', db_file=current_db) }}">Schedule</a></nav></header>
+  <div class="page-heading"><h1>Explore courses</h1><p>Search the active term, compare community fit, and add sections to your schedule plan.</p></div>
+
+  <form method="get" class="panel search-panel">
+    <div class="search-main">
+      <div class="control"><label for="db_file">Academic term</label><select id="db_file" name="db_file" onchange="this.form.submit()">{% for dbfile in db_files %}<option value="{{ dbfile }}" {% if dbfile==current_db %}selected{% endif %}>{{ dbfile.split('-')[2] if dbfile.split('-')|length>2 else dbfile }}</option>{% endfor %}</select></div>
+      <div class="control"><label for="q">Search</label><input id="q" name="q" value="{{ q }}" placeholder="Course, title, instructor, or keyword"></div>
+      <button class="btn btn-primary" type="submit">Search</button>
+      <a class="btn btn-outline" href="{{ url_for('courses', db_file=current_db) }}">Clear</a>
+    </div>
+    <details {% if subject_filter or session_code or days or units or enrl_stat or instructor_name %}open{% endif %}><summary style="margin-top:14px;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer">Filters</summary><div class="filter-grid">
+      <div class="control"><label>Subject</label><select name="subject"><option value="">All subjects</option>{% for item in subjects %}<option value="{{ item.subject }}" {% if item.subject==subject_filter %}selected{% endif %}>{{ item.subject }}</option>{% endfor %}</select></div>
+      <div class="control"><label>Session</label><select name="session_code"><option value="">All sessions</option>{% for item in sessions %}<option value="{{ item.session_code }}" {% if item.session_code==session_code %}selected{% endif %}>{{ item.descr }}</option>{% endfor %}</select></div>
+      <div class="control"><label>Meeting days</label><input name="days" value="{{ days }}" placeholder="MoWe"></div>
+      <div class="control"><label>Units</label><select name="units"><option value="">Any</option>{% for item in unit_options %}<option value="{{ item }}" {% if item|string==units %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+      <div class="control"><label>Availability</label><select name="enrl_stat"><option value="">Any</option><option value="O" {% if enrl_stat=='O' %}selected{% endif %}>Open</option><option value="C" {% if enrl_stat=='C' %}selected{% endif %}>Closed</option><option value="W" {% if enrl_stat=='W' %}selected{% endif %}>Waitlist</option></select></div>
+      <div class="control"><label>Instructor</label><input name="instructor_name" value="{{ instructor_name }}" placeholder="Name"></div>
+      <div class="control"><label>Starts after</label><input name="start_time_min" value="{{ start_time_min }}" placeholder="09:00"></div>
+      <div class="control"><label>Ends before</label><input name="end_time_max" value="{{ end_time_max }}" placeholder="18:00"></div>
+      <div class="control"><label>Component</label><select name="component"><option value="">Any</option>{% for item in component_options %}<option value="{{ item }}" {% if item==component %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+      <div class="control" style="align-self:end"><button class="btn btn-primary" type="submit">Apply filters</button></div>
+    </div></details>
+  </form>
+
+  <div class="results-meta"><span><strong>{{ rows|length }}</strong> sections shown</span><a class="btn btn-outline btn-sm" href="{{ url_for('export_courses', db_file=current_db) }}">Export CSV</a></div>
+  {% if rows %}<section class="course-list">{% for row in rows %}<article class="panel course-row">
+    <div class="course-id"><strong>{{ row.course_code }}</strong><span>{{ row.course_name or 'Untitled course' }} · {{ row.component }} {{ row.class_section }}</span></div>
+    <div class="cell"><strong>{{ row.meeting_days or 'TBA' }} {{ row.meeting_start_time or '' }}</strong><span>{{ row.meeting_end_time or '' }} · {{ row.session_code or 'Full term' }}</span></div>
+    <div class="cell"><strong>{{ row.instructor_names or 'Instructor TBA' }}</strong><span>{{ row.classroom or row.building or 'Location TBA' }}</span></div>
+    <div class="cell"><strong>{{ row.units }} units</strong><span class="status {{ 'open' if row.enrl_status=='Open' else 'closed' }}">{{ row.enrl_status or 'Unknown' }}</span></div>
+    <div class="metric match">{% if row.match_score is not none %}<strong>{{ row.match_score|round|int }}%</strong><span>personal fit</span>{% else %}<strong>—</strong><span>no reviews</span>{% endif %}</div>
+    <div class="actions"><button class="btn btn-outline btn-sm" type="button" onclick="addToPlan('{{ row.class_nbr }}','{{ row.course_code }}')">Add</button><a class="btn btn-primary btn-sm" href="{{ url_for('course_detail_page', class_nbr=row.class_nbr, term=row.term, career=current_career, db_file=current_db) }}">Details</a></div>
+  </article>{% endfor %}</section>{% else %}<section class="panel empty"><h2>No matching courses</h2><p>Try a broader search or remove one of the filters.</p></section>{% endif %}
+</main>
+<div class="toast" id="courseToast" role="status" aria-live="polite"></div>
+<script>
+function addToPlan(classNbr,courseCode){const key='dkuCurrentSelectionsV1';const lines=(localStorage.getItem(key)||'').split('\n').filter(Boolean);const value='#'+classNbr;if(!lines.includes(value))lines.push(value);localStorage.setItem(key,lines.join('\n'));const toast=document.getElementById('courseToast');toast.textContent=courseCode+' added to your schedule plan';toast.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}
+</script>
+</body>
+</html>

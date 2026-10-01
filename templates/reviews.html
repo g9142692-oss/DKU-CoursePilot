@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Course Reviews · DKU CoursePilot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <style>
+    .review-layout{display:grid;grid-template-columns:minmax(310px,.68fr) minmax(0,1.32fr);gap:20px;align-items:start}.review-form{padding:24px;position:sticky;top:20px}.review-form h2{margin:0 0 5px;font-size:20px}.review-form>p{margin:0 0 20px;color:var(--muted);font-size:12px;line-height:1.55}.field{display:grid;gap:6px;margin-bottom:14px}.field label{color:#344054;font-size:12px;font-weight:700}.field input,.field textarea{width:100%;padding:10px 12px;font:inherit;font-size:13px}.field textarea{min-height:95px;resize:vertical}.rating-grid{display:grid;gap:7px;margin:18px 0}.rating-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;background:#f8fafc}.rating-row label{font-size:12px;font-weight:700}.rating-row select{min-width:150px;padding:7px 9px}.scale-note{color:var(--muted);font-size:10px}.message{margin-bottom:14px;padding:11px 13px;border-radius:10px;font-size:12px;font-weight:700}.message.okay{color:#087a78;background:#e8fbf8}.message.error{color:var(--danger);background:#fff1f0}.stack{display:grid;gap:16px}.summary-head{display:flex;align-items:end;justify-content:space-between;gap:20px}.summary-head h2{margin:0;font-size:22px}.summary-head p{margin:5px 0 0;color:var(--muted);font-size:13px}.summary-list{display:grid;gap:10px}.summary-card{padding:20px}.summary-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.summary-top h3{margin:0 0 5px;font-size:15px}.summary-top p{margin:0;color:var(--muted);font-size:11px}.fit{min-width:68px;text-align:right}.fit strong{display:block;color:var(--primary);font-size:21px}.fit span{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.dimension-bars{display:grid;grid-template-columns:repeat(2,1fr);gap:9px 18px;margin-top:18px}.bar-row{display:grid;grid-template-columns:105px 1fr 24px;gap:8px;align-items:center}.bar-row label{color:#475467;font-size:10px}.bar{height:6px;overflow:hidden;border-radius:999px;background:#edf1f6}.bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--primary),var(--accent))}.bar-row b{font-size:10px;text-align:right}.recent{padding:22px}.recent h2{margin:0 0 15px;font-size:18px}.comment{padding:13px 0;border-top:1px solid var(--line)}.comment:first-of-type{border-top:0}.comment strong{font-size:12px}.comment span{color:var(--muted);font-size:11px}.comment p{margin:6px 0 0;color:#475467;font-size:12px;line-height:1.55}.empty{padding:38px;text-align:center;color:var(--muted)}@media(max-width:980px){.review-layout{grid-template-columns:1fr}.review-form{position:static}}@media(max-width:620px){.dimension-bars{grid-template-columns:1fr}.rating-row{grid-template-columns:1fr}.summary-top{flex-direction:column}.fit{text-align:left}}
+  </style>
+</head>
+<body>
+<main class="container">
+  <header class="app-header"><a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">DKU</span> CoursePilot</a><nav class="app-nav" aria-label="Main navigation"><a href="{{ url_for('index') }}">Home</a><a href="{{ url_for('courses', db_file=current_db) }}">Courses</a><a href="{{ url_for('profile_page') }}">Profile</a><a class="active" href="{{ url_for('reviews_page') }}">Reviews</a><a href="{{ url_for('schedule', db_file=current_db) }}">Schedule</a></nav></header>
+  <div class="page-heading"><h1>Course & instructor reviews</h1><p>One course can feel very different with another instructor. Reviews are summarized at the course-instructor level.</p></div>
+  <div class="review-layout">
+    <form class="panel review-form" method="post">
+      <h2>Share an experience</h2><p>Rate the specific course and instructor combination you took.</p>
+      {% if message %}<div class="message okay">{{ message }}</div>{% endif %}{% if error %}<div class="message error">{{ error }}</div>{% endif %}
+      <div class="field"><label for="course_code">Course</label><input id="course_code" name="course_code" list="courseOptions" required placeholder="COMPSCI 201"><datalist id="courseOptions">{% for course in course_options %}<option value="{{ course.course_code }}">{{ course.title }}</option>{% endfor %}</datalist></div>
+      <div class="field"><label for="instructor_name">Instructor</label><input id="instructor_name" name="instructor_name" list="instructorOptions" required placeholder="Instructor name"><datalist id="instructorOptions"></datalist></div>
+      {% set labels={'teaching_quality':'Teaching quality','exam_difficulty':'Exam difficulty','grading':'Grading fairness','workload':'Workload','content_value':'Course substance','accessibility':'Accessibility','pace':'Course pace'} %}
+      {% set ends={'teaching_quality':['Poor','Excellent'],'exam_difficulty':['Easy','Hard'],'grading':['Strict','Generous'],'workload':['Light','Heavy'],'content_value':['Surface-level','Substantial'],'accessibility':['Limited','Highly accessible'],'pace':['Gradual','Fast']} %}
+      <div class="rating-grid">{% for dimension,label in labels.items() %}<div class="rating-row"><div><label for="{{ dimension }}">{{ label }}</label><div class="scale-note">1 = {{ ends[dimension][0] }} · 5 = {{ ends[dimension][1] }}</div></div><select id="{{ dimension }}" name="{{ dimension }}" required><option value="">Select</option>{% for value in range(1,6) %}<option value="{{ value }}">{{ value }}</option>{% endfor %}</select></div>{% endfor %}</div>
+      <div class="field"><label for="comment">Short comment (optional)</label><textarea id="comment" name="comment" maxlength="1000" placeholder="What would help another student decide?"></textarea></div>
+      <button class="btn btn-primary" type="submit">Submit review</button>
+    </form>
+    <div class="stack">
+      <div class="summary-head"><div><h2>Community summaries</h2><p>Personal fit compares these ratings with the ideal levels saved in your profile.</p></div></div>
+      {% if aggregates %}<section class="summary-list">{% set short={'teaching_quality':'Teaching','exam_difficulty':'Exam difficulty','grading':'Grading','workload':'Workload','content_value':'Substance','accessibility':'Access','pace':'Pace'} %}{% for item in aggregates %}<article class="panel summary-card"><div class="summary-top"><div><h3>{{ item.course_code }} · {{ item.instructor_name }}</h3><p>{{ item.review_count }} review{% if item.review_count != 1 %}s{% endif %}</p></div><div class="fit">{% if item.match_score is not none %}<strong>{{ item.match_score|round|int }}%</strong><span>personal fit</span>{% else %}<strong>—</strong><span>set profile</span>{% endif %}</div></div><div class="dimension-bars">{% for key,label in short.items() %}<div class="bar-row"><label>{{ label }}</label><div class="bar"><span style="width:{{ (item['avg_'+key] / 5 * 100)|round }}%"></span></div><b>{{ item['avg_'+key] }}</b></div>{% endfor %}</div></article>{% endfor %}</section>{% else %}<section class="panel empty"><h2>No reviews yet</h2><p>Be the first to add a course and instructor experience.</p></section>{% endif %}
+      {% if recent_reviews %}<section class="panel recent"><h2>Recent comments</h2>{% for item in recent_reviews %}<div class="comment"><strong>{{ item.course_code }} · {{ item.instructor_name }}</strong><span> · {{ item.created_at[:10] }}</span>{% if item.comment %}<p>{{ item.comment }}</p>{% endif %}</div>{% endfor %}</section>{% endif %}
+    </div>
+  </div>
+</main>
+<script>
+const courses={{ course_options|tojson }};
+const courseInput=document.getElementById('course_code');
+const instructorList=document.getElementById('instructorOptions');
+function updateInstructors(){const code=courseInput.value.trim().toUpperCase();const item=courses.find(c=>c.course_code===code);instructorList.innerHTML='';(item?item.instructors:[]).forEach(name=>{const option=document.createElement('option');option.value=name;instructorList.appendChild(option);});}
+courseInput.addEventListener('input',updateInstructors);
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Runtime data (personal profiles, cookies, local planner database)
+data/planner.db
+dku_cookie.txt
+
+# OS / editor
+.DS_Store

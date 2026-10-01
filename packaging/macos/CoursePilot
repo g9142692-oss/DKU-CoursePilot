@@ -1,0 +1,5 @@
+#!/bin/zsh
+
+CONTENTS_DIR=${0:A:h:h}
+"$CONTENTS_DIR/Resources/launch.sh" >/dev/null 2>&1 &
+exit 0

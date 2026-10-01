@@ -1,6 +1,6 @@
 # DKU CoursePilot
 
-> 🏆 **A DKU hackathon project, built by a team of three.**
+> **A DKU hackathon project, built by a team of three.**
 
 DKU CoursePilot is a bulletin-aware course planning and schedule-building application for Duke Kunshan University students. It combines the supplied course catalogs, degree requirements, personal academic history, course preferences, instructor reviews, and requisite checks in one English-language interface.
 
